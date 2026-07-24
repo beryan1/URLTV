@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مولد روابط مشغل بريان تفي</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  min-height:100vh;
+  font-family:Tajawal,Arial,sans-serif;
+  background:
+    radial-gradient(circle at top right,rgba(0,230,118,.22),transparent 35%),
+    radial-gradient(circle at bottom left,rgba(33,150,243,.18),transparent 35%),
+    linear-gradient(135deg,#06060a,#121220,#1d1d29);
+  color:#fff;
+  padding:18px;
+}
+.container{max-width:980px;margin:auto}
+.header{text-align:center;padding:20px 0}
+.header h1{margin:0;font-size:30px;font-weight:900}
+.header p{margin:8px 0;color:#b9b9c9}
+.badge{
+  display:inline-block;
+  margin-top:12px;
+  padding:7px 14px;
+  border-radius:999px;
+  background:rgba(0,230,118,.12);
+  border:1px solid rgba(0,230,118,.25);
+  color:#00e676;
+  font-weight:800;
+}
+.card{
+  background:rgba(255,255,255,.075);
+  border:1px solid rgba(255,255,255,.13);
+  border-radius:28px;
+  padding:22px;
+  box-shadow:0 24px 70px rgba(0,0,0,.45);
+  backdrop-filter:blur(14px);
+}
+.server{
+  background:rgba(0,0,0,.26);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:22px;
+  padding:18px;
+  margin:16px 0;
+}
+.server-title{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:14px;
+  font-weight:900;
+}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+label{display:block;margin:12px 0 7px;font-weight:800;color:#eee}
+input,textarea{
+  width:100%;
+  border:1px solid rgba(255,255,255,.13);
+  background:#0f1020;
+  color:#fff;
+  padding:14px;
+  border-radius:15px;
+  font-size:15px;
+  outline:none;
+  font-family:Tajawal,Arial,sans-serif;
+}
+textarea{min-height:120px;direction:ltr;resize:vertical}
+input:focus,textarea:focus{
+  border-color:#00e676;
+  box-shadow:0 0 0 3px rgba(0,230,118,.13);
+}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+button{
+  border:0;
+  border-radius:16px;
+  padding:14px;
+  font-size:16px;
+  font-weight:900;
+  cursor:pointer;
+  font-family:Tajawal,Arial,sans-serif;
+}
+.add{background:linear-gradient(135deg,#343444,#56566b);color:#fff}
+.generate{background:linear-gradient(135deg,#00c853,#00e676);color:#061408}
+.copy{background:linear-gradient(135deg,#1976d2,#03a9f4);color:#fff}
+.open{background:linear-gradient(135deg,#ff9800,#ffc107);color:#160c00}
+.remove{
+  background:#d32f2f;
+  color:#fff;
+  padding:8px 13px;
+  font-size:13px;
+}
+.note{
+  margin-top:16px;
+  color:#b8b8c8;
+  font-size:13px;
+  line-height:1.9;
+}
+@media(max-width:720px){
+  body{padding:12px}
+  .header h1{font-size:23px}
+  .card{padding:16px;border-radius:22px}
+  .grid,.actions{grid-template-columns:1fr}
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1>مولد روابط مشغل البصري</h1>
+    <p>توليد روابط player و player1 تلقائياً حسب نوع الرابط</p>
+    <span class="badge">لberyanTV LINK GENERATOR</span>
+  </div>
+
+  <div class="card">
+    <div id="servers"></div>
+
+    <div class="actions">
+      <button class="add" onclick="addServer()">+ إضافة سيرفر</button>
+      <button class="generate" onclick="generate()">توليد الرابط</button>
+    </div>
+
+    <label>رابط المشغل الجاهز</label>
+    <textarea id="result" readonly placeholder="سيظهر الرابط هنا"></textarea>
+
+    <div class="actions">
+      <button class="copy" onclick="copyLink()">نسخ الرابط</button>
+      <button class="open" onclick="openLink()">فتح الرابط</button>
+    </div>
+
+    <div class="note">
+      روابط <b>MPD</b> أو التي تحتوي <b>ClearKey</b> يتم توليدها على <b>player1.html</b>.<br>
+      روابط <b>m3u8 / mp4 / ts / png#hls</b> يتم توليدها على <b>player.html</b>.<br>
+      عند إضافة أكثر من سيرفر يتم توليد رابط مشفّر داخل <b>servers=</b>.
+    </div>
+  </div>
+</div>
+
+<script>
+const PLAYER_NORMAL = "https://albasri-tv.github.io/player.html";
+const PLAYER_MPD = "https://albasri-tv.github.io/player1.html";
+let count = 0;
+
+function addServer(data={}){
+  count++;
+  const box=document.createElement("div");
+  box.className="server";
+  box.innerHTML=`
+    <div class="server-title">
+      <span>السيرفر ${count}</span>
+      <button class="remove" onclick="this.closest('.server').remove()">حذف</button>
+    </div>
+
+    <label>اسم السيرفر</label>
+    <input class="name" placeholder="مثلاً Server 1" value="${data.name||''}">
+
+    <label>رابط السيرفر</label>
+    <input class="url" placeholder="m3u8 / mpd / mp4 / ts / png#hls" value="${data.url||''}">
+
+    <label>ClearKey اختياري</label>
+    <input class="ck" placeholder="KID:KEY" value="${data.ck||''}">
+
+    <div class="grid">
+      <div>
+        <label>Referer اختياري</label>
+        <input class="ref" placeholder="https://site.com/" value="${data.ref||''}">
+      </div>
+      <div>
+        <label>User-Agent اختياري</label>
+        <input class="ua" placeholder="Mozilla/5.0 ..." value="${data.ua||''}">
+      </div>
+    </div>
+  `;
+  document.getElementById("servers").appendChild(box);
+}
+
+function encodeServers(data){
+  return btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+}
+
+function isMpdOrDrm(url, ck){
+  url=(url||"").toLowerCase();
+  return url.includes(".mpd") || !!ck;
+}
+
+function generate(){
+  const servers=[];
+  document.querySelectorAll(".server").forEach((box,i)=>{
+    const name=box.querySelector(".name").value.trim() || `Server ${i+1}`;
+    const url=box.querySelector(".url").value.trim();
+    const ck=box.querySelector(".ck").value.trim();
+    const ref=box.querySelector(".ref").value.trim();
+    const ua=box.querySelector(".ua").value.trim();
+    if(url) servers.push({name,url,ck,ref,ua});
+  });
+
+  if(!servers.length) return alert("أضف سيرفر أولاً");
+
+  let finalLink="";
+
+  if(servers.length===1){
+    const s=servers[0];
+    const player=isMpdOrDrm(s.url,s.ck)?PLAYER_MPD:PLAYER_NORMAL;
+
+    const p=new URLSearchParams();
+    p.set("url",s.url);
+    p.set("title",s.name);
+    if(s.ck) p.set("ck",s.ck);
+    if(s.ref) p.set("ref",s.ref);
+    if(s.ua) p.set("ua",s.ua);
+
+    finalLink=player+"?"+p.toString();
+  }else{
+    const hasMpd=servers.some(s=>isMpdOrDrm(s.url,s.ck));
+    const player=hasMpd?PLAYER_MPD:PLAYER_NORMAL;
+    finalLink=player+"?servers="+encodeURIComponent(encodeServers({servers}));
+  }
+
+  document.getElementById("result").value=finalLink;
+}
+
+function copyLink(){
+  const r=document.getElementById("result");
+  if(!r.value) return alert("ولّد الرابط أولاً");
+  r.select();
+  document.execCommand("copy");
+  alert("تم النسخ");
+}
+
+function openLink(){
+  const link=document.getElementById("result").value;
+  if(!link) return alert("ولّد الرابط أولاً");
+  window.open(link,"_blank");
+}
+
+addServer();
+</script>
+
+</body>
+</html>
